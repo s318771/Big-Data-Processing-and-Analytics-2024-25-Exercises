@@ -314,7 +314,9 @@ top3PM10Value = pm10ValuesRDD.takeOrdered(3, lambda num: -num)
     <img src="./images/image-9.png" alt="alt text" width="45%" />
 </p>
 
-1. We first map the values and find the maximum with reduce. We then use this result to select from all the lines only those where the PM10 value is equal to this one (`filter()` action). We used the `reduce()` method to find the maximum, but we could have used `top()` or `takeOrdered()` as in the example before without problems.
+1. We first map the values and find the maximum with reduce. We then use this result to select from all the lines only those where the PM10 value is equal to this one (`filter()` action).
+We used the `reduce()` method to find the maximum, but we could have used `top()` or `takeOrdered()` as in the example before without problems.
+Be careful: we can use `takeOrdered()` or `top()` only to select the maximum value, not to select all the lines associated with the maximum value!
 
 ### version with reduce() and filter()
 
@@ -503,6 +505,23 @@ sumPM10ValuesCountLines = readingsRDD.aggregate((0,0), \
 # sumPM10ValuesCountLines[0] is equal to the sum of the input PM10 values
 # sumPM10ValuesCountLines[1] is equal to the number of input lines/input values
 print("Average=", sumPM10ValuesCountLines[0]/sumPM10ValuesCountLines[1])
+```
+
+### version 3, small variation
+
+```py
+readingsRDD = sc.textFile(inputPath)
+
+pm10ValuesRDD = readingsRDD.map(lambda line: float(line.split(',')[2]))
+
+sumCount = pm10ValuesRDD.aggregate((0, 0), # zero value (sum, count)
+                                   lambda prev, new: (prev[0] + new, prev[1] + 1), #seqOp
+                                   lambda p1, p2: (p1[0] + p2[0], p1[1] + p2[1]) #combop
+                                   )
+
+avgPm10 = sumCount[0] / sumCount[1]
+
+print(avgPm10)
 ```
 
 ---
