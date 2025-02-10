@@ -533,6 +533,10 @@ print(avgPm10)
     <img src="./images/image-15.png" alt="alt text" width="45%" />
 </p>
 
+Here, the main point to understand is that we start by creating tuples (sensor_id, pm10Value) using `map()`. Then we use `reduceByKey()` to obtain something like (sensor_id, max pm10 value for that sensor_id). This gives us the desired result. 😊
+With `reduceByKey()` we are able to obtain a single-value final result for each key.
+Otherwise, if we wanted a list of values for each key → `groupByKey()`
+
 ```py
 from pyspark import SparkConf, SparkContext
 
@@ -618,10 +622,10 @@ sensorsCountsCriticalRDD.saveAsTextFile(outputPath)
     <img src="./images/image-19.png" alt="alt text" width="45%" />
 </p>
 
-1. I select the sensor_ids where the threshold is > 50 (`filter()`)
-2. I create an RDD with pairs (sensor_id, date) (`map()` transformation)
-3. I group by key all the values created before (`groupByKey()`)
-4. Then I have to transform the content of values into listIPs
+1. We select the sensor_ids where the threshold is > 50 (`filter()`)
+2. We create an RDD with pairs (sensor_id, date) (`map()` transformation)
+3. We group by key all the values created before (`groupByKey()`)
+4. Then we have to transform the content of values into list for correctness
 
 ```py
 from pyspark import SparkConf, SparkContext
@@ -769,7 +773,12 @@ sortedPairs.saveAsTextFile(outputPath)
 </p>
 
 **Version 1** → use of `top()`
+
+- Pay attention: `top()` is an action → it will return a python local variable, not an RDD (we will create it before saving in the HDFS)
+
 **Version 2** → use of `sortBy()` and then `take(k)`
+
+- Same story for `take(k)` → it is an action → doesn't return RDDs
 
 ### version 1
 
@@ -864,10 +873,16 @@ topKSensorsRDD.saveAsTextFile(outputPath)
     <img src="./images/image-30.png" alt="alt text" width="45%" />
 </p>
 
-| **Remember**:    |
-|-------------------------------------------------------------|
-| whenever there is the need to pair keys and list of all values associated with that key:                |
-| → **`cogroup()`**                                           |
+The strategy here is the following:
+
+1. We create question pairs (question_id, text_of_the_question)
+2. We create answer pairs (question_id, text_of_the_answer)
+3. We create question-answers pairs with `cogroup()`
+    - the 'key' will be *question_id*
+    - the 'value' will be a tuple with 2 iterables: one over text_of_the_question and another one over text_of_the_answer
+    They will clearly need to be reformatted.
+
+**Remember**: whenever there is the need to pair keys and list of all values associated with that key → **`cogroup()`** transformation
 
 ```py
 from pyspark import SparkConf, SparkContext
@@ -914,7 +929,7 @@ questionsAnswersReformatted.saveAsTextFile(outputPath)
     <img src="./images/image-37.png" alt="alt text" width="45%" />
 </p>
 
-Note on .cache():
+Note on `cache()`:
 → It is used in Pyspark to memorize in the cache an RDD (or a Dataframe).
 → When an RDD or DataFrame is cached, it is stored in memory (RAM) on the cluster nodes, making subsequent operations on it much faster.
 → This is particularly useful when you plan to reuse the same RDD or DataFrame multiple times within a Spark application.
