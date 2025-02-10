@@ -1,8 +1,10 @@
+# Spark RDD-based exercises
+
 ## Ex 30
 
 <p float="left">
-    <img src="image.png" alt="alt text" width="45%" />
-    <img src="image-1.png" alt="alt text" width="45%" />
+    <img src="./images/image.png" alt="alt text" width="45%" />
+    <img src="./images/image-1.png" alt="alt text" width="45%" />
 </p>
 
 ```python
@@ -33,8 +35,8 @@ googleRDD.saveAsTextFile(outputPath)
 ## Ex 31
 
 <p float="left">
-    <img src="image-2.png" alt="alt text" width="45%" />
-    <img src="image-3.png" alt="alt text" width="45%" />
+    <img src="./images/image-2.png" alt="alt text" width="45%" />
+    <img src="./images/image-3.png" alt="alt text" width="45%" />
 </p>
 
 #### difference between map() and flatmap()
@@ -147,8 +149,8 @@ distinctIPsRDD.saveAsTextFile(outputPath)
 ## Ex 32
 
 <p float="left">
-    <img src="image-4.png" alt="alt text" width="45%" />
-    <img src="image-5.png" alt="alt text" width="45%" />
+    <img src="./images/image-4.png" alt="alt text" width="45%" />
+    <img src="./images/image-5.png" alt="alt text" width="45%" />
 </p>
 
 1. We can use the take `takeOrdered(num)` action → since by default it uses the ascending order, we customize the sorting function by negating the elements. In this way we get the elements in descending order and we  only the first one.
@@ -273,8 +275,8 @@ After applying the `reduce()` function across all elements in the RDD, the maxim
 ## Ex 33
 
 <p float="left">
-    <img src="image-6.png" alt="alt text" width="45%" />
-    <img src="image-7.png" alt="alt text" width="45%" />
+    <img src="./images/image-6.png" alt="alt text" width="45%" />
+    <img src="./images/image-7.png" alt="alt text" width="45%" />
 </p>
 
 ### version with top()
@@ -307,8 +309,8 @@ top3PM10Value = pm10ValuesRDD.takeOrdered(3, lambda num: -num)
 ## Ex 34
 
 <p float="left">
-    <img src="image-8.png" alt="alt text" width="45%" />
-    <img src="image-9.png" alt="alt text" width="45%" />
+    <img src="./images/image-8.png" alt="alt text" width="45%" />
+    <img src="./images/image-9.png" alt="alt text" width="45%" />
 </p>
 
 1. We first map the values and find the maximum with reduce. We then use this result to select from all the lines only those where the PM10 value is equal to this one (`filter()` action). We used the `reduce()` method to find the maximum, but we could have used `top()` or `takeOrdered()` as in the example before without problems.
@@ -370,8 +372,8 @@ selectedRecordsRDD = sc.parallelize(selectedRecords)
 ## Ex 35
 
 <p float="left">
-    <img src="image-10.png" alt="alt text" width="45%" />
-    <img src="image-11.png" alt="alt text" width="45%" />
+    <img src="./images/image-10.png" alt="alt text" width="45%" />
+    <img src="./images/image-11.png" alt="alt text" width="45%" />
 </p>
 
 1. We find the maximum as before
@@ -417,8 +419,8 @@ distinctDatesRDD.saveAsTextFile(outputPath)
 ## Ex 36
 
 <p float="left">
-    <img src="image-12.png" alt="alt text" width="45%" />
-    <img src="image-13.png" alt="alt text" width="45%" />
+    <img src="./images/image-12.png" alt="alt text" width="45%" />
+    <img src="./images/image-13.png" alt="alt text" width="45%" />
 </p>
 
 **Version 1**
@@ -507,8 +509,8 @@ print("Average=", sumPM10ValuesCountLines[0]/sumPM10ValuesCountLines[1])
 ## Ex 37
 
 <p float="left">
-    <img src="image-14.png" alt="alt text" width="45%" />
-    <img src="image-15.png" alt="alt text" width="45%" />
+    <img src="./images/image-14.png" alt="alt text" width="45%" />
+    <img src="./images/image-15.png" alt="alt text" width="45%" />
 </p>
 
 ```py
@@ -545,8 +547,8 @@ sensorsMaxValuesRDD.saveAsTextFile(outputPath)
 ## Ex 38
 
 <p float="left">
-    <img src="image-16.png" alt="alt text" width="45%" />
-    <img src="image-17.png" alt="alt text" width="45%" />
+    <img src="./images/image-16.png" alt="alt text" width="45%" />
+    <img src="./images/image-17.png" alt="alt text" width="45%" />
 </p>
 
 1. We select only the lines where the PM10Value has a value greater than the threshold (`filter()`)
@@ -592,8 +594,8 @@ sensorsCountsCriticalRDD.saveAsTextFile(outputPath)
 ## Ex 39
 
 <p float="left">
-    <img src="image-18.png" alt="alt text" width="45%" />
-    <img src="image-19.png" alt="alt text" width="45%" />
+    <img src="./images/image-18.png" alt="alt text" width="45%" />
+    <img src="./images/image-19.png" alt="alt text" width="45%" />
 </p>
 
 1. I select the sensor_ids where the threshold is > 50 (`filter()`)
@@ -637,8 +639,8 @@ finalSensorCriticalDateStringFormat.saveAsTextFile(outputPath)
 ## Ex 39 bis
 
 <p float="left">
-    <img src="image-20.png" alt="alt text" width="45%" />
-    <img src="image-21.png" alt="alt text" width="45%" />
+    <img src="./images/image-20.png" alt="alt text" width="45%" />
+    <img src="./images/image-21.png" alt="alt text" width="45%" />
 </p>
 
 The first part is identical to the previous one.
@@ -695,8 +697,8 @@ resultRDD = finalSensorCriticalDateStringFormat.union(sensorsNeverHighValueRDDEm
 ## Ex 40
 
 <p float="left">
-    <img src="image-22.png" alt="alt text" width="45%" />
-    <img src="image-23.png" alt="alt text" width="45%" />
+    <img src="./images/image-22.png" alt="alt text" width="45%" />
+    <img src="./images/image-23.png" alt="alt text" width="45%" />
 </p>
 
 1. We create an RDD with the lines where the PM10Value > 50 (`filter()`)
@@ -741,9 +743,9 @@ sortedPairs.saveAsTextFile(outputPath)
 ## Ex 41
 
 <p float="left">
-    <img src="image-24.png" alt="alt text" width="45%" />
-    <img src="image-25.png" alt="alt text" width="45%" />
-    <img src="image-26.png" alt="alt text" width="45%" />
+    <img src="./images/image-24.png" alt="alt text" width="45%" />
+    <img src="./images/image-25.png" alt="alt text" width="45%" />
+    <img src="./images/image-26.png" alt="alt text" width="45%" />
 </p>
 
 **Version 1** → use of `top()`
@@ -836,10 +838,10 @@ topKSensorsRDD.saveAsTextFile(outputPath)
 ## Ex 42
 
 <p float="left">
-    <img src="image-27.png" alt="alt text" width="45%" />
-    <img src="image-28.png" alt="alt text" width="45%" />
-    <img src="image-29.png" alt="alt text" width="45%" />
-    <img src="image-30.png" alt="alt text" width="45%" />
+    <img src="./images/image-27.png" alt="alt text" width="45%" />
+    <img src="./images/image-28.png" alt="alt text" width="45%" />
+    <img src="./images/image-29.png" alt="alt text" width="45%" />
+    <img src="./images/image-30.png" alt="alt text" width="45%" />
 </p>
 
 | **Remember**:    |
@@ -883,13 +885,13 @@ questionsAnswersReformatted.saveAsTextFile(outputPath)
 ## EX 43
 
 <p float="left">
-    <img src="image-31.png" alt="alt text" width="45%" />
-    <img src="image-32.png" alt="alt text" width="45%" />
-    <img src="image-33.png" alt="alt text" width="45%" />
-    <img src="image-34.png" alt="alt text" width="45%" />
-    <img src="image-35.png" alt="alt text" width="45%" />
-    <img src="image-36.png" alt="alt text" width="45%" />
-    <img src="image-37.png" alt="alt text" width="45%" />
+    <img src="./images/image-31.png" alt="alt text" width="45%" />
+    <img src="./images/image-32.png" alt="alt text" width="45%" />
+    <img src="./images/image-33.png" alt="alt text" width="45%" />
+    <img src="./images/image-34.png" alt="alt text" width="45%" />
+    <img src="./images/image-35.png" alt="alt text" width="45%" />
+    <img src="./images/image-36.png" alt="alt text" width="45%" />
+    <img src="./images/image-37.png" alt="alt text" width="45%" />
 </p>
 
 Note on .cache():
@@ -1127,10 +1129,10 @@ selectedReadingsRDD.saveAsTextFile(outputPath3)
 ## Ex 44
 
 <p float="left">
-    <img src="image-38.png" alt="alt text" width="45%" />
-    <img src="image-39.png" alt="alt text" width="45%" />
-    <img src="image-40.png" alt="alt text" width="45%" />
-    <img src="image-41.png" alt="alt text" width="45%" />
+    <img src="./images/image-38.png" alt="alt text" width="45%" />
+    <img src="./images/image-39.png" alt="alt text" width="45%" />
+    <img src="./images/image-40.png" alt="alt text" width="45%" />
+    <img src="./images/image-41.png" alt="alt text" width="45%" />
 </p>
 
 ```py
@@ -1220,10 +1222,10 @@ misleadingUsersRDD.saveAsTextFile(outputPath)
 ## Ex 45
 
 <p float="left">
-    <img src="image-42.png" alt="alt text" width="45%" />
-    <img src="image-43.png" alt="alt text" width="45%" />
-    <img src="image-44.png" alt="alt text" width="45%" />
-    <img src="image-45.png" alt="alt text" width="45%" />
+    <img src="./images/image-42.png" alt="alt text" width="45%" />
+    <img src="./images/image-43.png" alt="alt text" width="45%" />
+    <img src="./images/image-44.png" alt="alt text" width="45%" />
+    <img src="./images/image-45.png" alt="alt text" width="45%" />
 </p>
 
 ```py
@@ -1349,9 +1351,9 @@ misleadingUserGenrePairRDD.saveAsTextFile(outputPath)
 ## Ex 46
 
 <p float="left">
-    <img src="image-46.png" alt="alt text" width="45%" />
-    <img src="image-47.png" alt="alt text" width="45%" />
-    <img src="image-48.png" alt="alt text" width="45%" />
+    <img src="./images/image-46.png" alt="alt text" width="45%" />
+    <img src="./images/image-47.png" alt="alt text" width="45%" />
+    <img src="./images/image-48.png" alt="alt text" width="45%" />
 </p>
 
 ```py
