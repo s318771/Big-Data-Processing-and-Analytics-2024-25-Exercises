@@ -153,8 +153,8 @@ distinctIPsRDD.saveAsTextFile(outputPath)
     <img src="./images/image-5.png" alt="alt text" width="45%" />
 </p>
 
-1. We can use the take `takeOrdered(num)` action → since by default it uses the ascending order, we customize the sorting function by negating the elements. In this way we get the elements in descending order and we  only the first one.
-2. We can also use the `top(num)` action → it will retrieve the `num` largest elements in the collection. Of course, we will take only the first one.
+1. We can use the take `takeOrdered(num)` action → since by default it uses the ascending order, we customize the sorting function by negating the elements. In this way we get the elements in descending order and we  only the first one. Keep in mind it returns a list even if there is only one element.
+2. We can also use the `top(num)` action → it will retrieve the `num` largest elements in the collection. Of course, we will take only the first one. Same as before: keep in mind it returns a list even if there is only one element.
 3. Firstly, with `map()` we retrieve all the values (the same as the examples before) and then with `reduce()` we take only the maximum value.
 
 ### version with takeOrdered()
@@ -173,6 +173,7 @@ readingsRDD = sc.textFile(inputPath)
 # Extract the PM10 values
 # It can be implemented by using the map transformation
 # Split each line and select the third field
+# Remember to convert it into a float, otherwise it will be a string
 pm10ValuesRDD = readingsRDD.map(lambda PM10Reading: float(PM10Reading.split(',')[2]))
 
 # Select the maximum PM10 value by using the takeOrdered action. We need to change the "sort function"
