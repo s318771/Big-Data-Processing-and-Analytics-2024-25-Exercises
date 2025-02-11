@@ -961,6 +961,46 @@ thresholdCriticalPercentage = 0.8
 
 ### part I
 
+Steps in this part:
+
+1. Identify Critical Situations
+    We wrote a function to use for mapping the readings. The mapping is done in this way:
+    - takes the reading
+    - returns tuple (station_id, (1, isCritical))
+        - the first 1 represents one reading (used to count all readings)
+        - is_critical is 1 is the situation is critical, 0 otherwise (used to count critical situations)
+    Example:
+
+    ```py
+    Input: "S1,2024-02-10,12,30,5,1"  # Station S1 has 1 free slot
+    Output: ("S1", (1,1))  # This is a critical situation
+    ```
+
+2. Count Total and Critical Readings per Station
+    We use `reduceByKey()` for this purpose, it will group data by station_id (the key) and for each pair of value tuple will compute the sum for both the values:
+    - c1[0] + c2[0] → sums up the total number of readings.
+    - c1[1] + c2[1] → sums up the number of critical readings.
+    Example:
+
+    ```py
+    Input: [("S1", (1,1)), ("S1", (1,0)), ("S1", (1,1))]
+    Output: ("S1", (3,2))  # (3 readings in total, 2 of them critical)
+    ```
+
+3. Compute the Percentage of Critical stations
+    We use mapValues() for this purpose. The value is a tuple counters = (total_readings, critical_readings).
+    So, for each tuple we will return a single value = counters[1] / counters[0]
+    Example of application of mapValues result:
+
+    ```py
+    Input: ("S1", (3,2))  # (3 readings in total, 2 of them critical)
+    Output: ("S1", 2/3) → ("S1", 0.6667)
+    ```
+
+4. Filter to keep only the pairs with Critical Percentage > 80
+5. Sort by Decreasing Percentage
+6. Save Results
+
 ```py
 # Solution Ex. 43 - part I
 # Selection of the stations with a percentage of critical situations
@@ -1008,7 +1048,96 @@ selectedStationsSortedPairRDD = selectedStationsPairRDD\
 selectedStationsSortedPairRDD.saveAsTextFile(outputPath)
 ```
 
+### part I , alternative 2 (less efficient, with usage of `join()`)
+
+```py
+# 1 - compute the percentage of critical situations for each station
+# critical_situation -> num_of_free_slots < thresholdFreeSlots
+# % critial situations = (critical readings of si) / (number of readings per si)
+# in the output file:
+# (station_id, %critial_situations) -> sorted by %critial_situations
+
+
+# station_id, date, hour, minute, num_of_bikes, num_of_free_slots
+readingsRDD = sc.textFile(inputPathReadings).cache()
+
+# filter the readings to retrieve only the lines of the critical ones
+criticalReadingsRDD = readingsRDD.filter(lambda line: int(line.split(',')[5]) < thresholdFreeSlots)
+
+# map to get the pairs (slot_id, 1) for critical readings
+criticalStationIdsOnesRDD = criticalReadingsRDD.map(lambda line: (line.split(',')[0], 1))
+
+# reduce to get the pairs (slot_id, num_critical_readings)
+criticalStationIdsNumOfCritialReadingsRDD = criticalStationIdsOnesRDD.reduceByKey(lambda v1, v2: v1 + v2)
+
+# map to get the pairs (slot_id, 1) for all readings
+allStationIdsOnesRDD = readingsRDD.map(lambda line: (line.split(',')[0], 1))
+
+# reduce to get pairs (slot_id, total_readings)
+allStationIdsTotalReadingsRDD = allStationIdsOnesRDD.reduceByKey(lambda v1, v2: v1 + v2)
+
+# we join the tuples of critical stations and all stations
+# inner join -> keep only the cases where there is a match between both of the collections
+# result : (station_id, (num_critial_readings, total_readings))
+joinCriticalAllRDD = criticalStationIdsNumOfCritialReadingsRDD.join(allStationIdsTotalReadingsRDD)
+
+# map this rdd to obtain (station_id, num_critial_readings/total_readings)
+stationIdPercentagePairsRDD = joinCriticalAllRDD.map(lambda pair: (pair[0], float(pair[1][0]) / float(pair[1][1])))
+
+# keep only the stations with percentage > thresholdCriticalPercentage
+filteredStationIdPercentagePairsRDD = stationIdPercentagePairsRDD.filter(lambda pair: pair[1] > thresholdCriticalPercentage)
+
+# sort them by percentage value:
+sortedStationIdPercentagePairsRDD = filteredStationIdPercentagePairsRDD.sortBy(lambda pair: pair[1], False)
+
+# save the result
+sortedStationIdPercentagePairsRDD.saveAsTextFile(outputPath)
+```
+
 ### part II
+
+Steps in this part:
+
+1. Define the function to categorize readings into timeslots and use it to map the readings
+    This function takes the hole line of the input reading and splits it in an array of fields.
+
+    It is used in the map process of the input lines: takes the line and returns:
+
+    - key : (time_slot, station)
+    - value: (1, 1) if critical, (1, 0) otherwise
+
+    To calculate the timeslot we consider the hour of the reading (e.g. hour = 5, it falls into [4 - 7])
+    The map phase will generate an RDD with pairs:
+
+    ```py
+    (("ts[4-7]", "Station_12"), (1, 1))
+    (("ts[8-11]", "Station_5"), (1, 0))
+    (("ts[16-19]", "Station_8"), (1, 1))
+    ```
+
+    The first value (`1`) counts the total readings, the second value (`1` or `0`) counts critical readings.
+2. Count total and Critcal Readings per (timeslot, station)
+    We use `reduceByKey()` to group by (timesolt, station) and sum up values.
+    What we obtain is something like this:
+
+    ```py
+    ("ts[4-7]", "Station_12") -> (10, 7)   # 10 total readings, 7 critical
+    ("ts[8-11]", "Station_5") -> (8, 2)    # 8 total readings, 2 critical
+    ("ts[16-19]", "Station_8") -> (5, 5)   # 5 total readings, 5 critical
+    ```
+
+3. Compute the Percentage of Critical situations
+    We use `mapValues()` for this purpose, and we obtain something like this:
+
+    ```py
+    ("ts[4-7]", "Station_12") -> 7 / 10 = 0.7
+    ("ts[8-11]", "Station_5") -> 2 / 8 = 0.25
+    ("ts[16-19]", "Station_8") -> 5 / 5 = 1.0
+    ```
+
+4. Filter Pairs with Percentage > 80%
+5. Sort them by Percentage (Descending)
+6. Save the output to HDFS
 
 ```py
 # Solution Ex. 43 - part II
@@ -1069,6 +1198,60 @@ percentageTimestampStationsSortedPairRDD.saveAsTextFile(outputPath2)
 ```
 
 ### part III
+
+What we want: to select the lines of the readings that are full and at the same time also all the neighboring stations are full in the specific time slot of the selected line.
+
+Steps:
+
+1. Load the Neighbors Data
+2. Map Each Line to Station -> Neighbors
+
+    ```py
+    Example Input: "S1,S2 S3 S4"
+    Output: ("S1", ["S2", "S3", "S4"])
+    ```
+
+3. Collect Neighbors in a Local Dictionary
+
+    ```py
+    neighbors = {"S1": ["S2", "S3", "S4"], "S2": ["S1", "S3", "S5"]}
+    ```
+
+4. Filter Full Status Readings (Free Solts = 0)
+    This step keeps only the readings where stations are full, which is the starting point for the next filtering steps.
+5. Define function to Extract Timestamp
+    The timestamp is formed by concatenating date, hour, minute
+    It will be used as key to group readings by time
+6. Create a Pair RDD with Timestamp and Reading
+    - key = the timestamp (from previous step)
+    - value = full status reading (station with free slots = 0)
+
+    ```py
+    Example output: ("2024-02-10 12:30", "S1,2024-02-10,12,30,5,0")
+    ```
+
+7. Group readings by timestamp
+    All readings from the same time period are gathered together.
+
+    ```py
+    Input: [("2024-02-10 12:30", "S1,2024-02-10,12,30,5,0")],[("2024-02-10 12:30", "S2,2024-02-10,12,30,5,0")]
+    Output: [("2024-02-10 12:30", [list_of_readings])]
+    ```
+
+8. Define the Selection Function
+    It iterates over the readings for each timestamp.
+    1. Extracts the list of full stations for the current timestamp
+    2. Checks if all neighboring stations for each station are also full:
+        - For each station in the timestamp, it checks whether every neighbor is present in the list of full stations.
+        - If all neighbors are full, the reading is selected
+    3. Returns a list of selected readings that satisfy the constraints.
+
+9. Apply the Selection Function and Flatten
+    Each selected reading satisfy the constraint that:
+    - The station is full
+    - All its neighbors are also full at the same timestamp
+
+10. Save the result
 
 ```py
 # Solution Ex. 43 - part III
